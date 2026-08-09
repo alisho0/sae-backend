@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class EscuelaService {
         return escuelaRepository.findById(id);
     }
 
+    @Transactional
     public Escuela create(EscuelaRequestDto escuela) {
         if (escuela.getUsuarioNombre() == null || escuela.getUsuarioNombre().isBlank()
                 || escuela.getUsuarioPassword() == null || escuela.getUsuarioPassword().isBlank()) {
@@ -45,7 +47,6 @@ public class EscuelaService {
         escuelaEntity.setNombre(escuela.getNombre() != null ? escuela.getNombre() : "");
         escuelaEntity.setCue(escuela.getCue() != null ? escuela.getCue() : "");
         escuelaEntity.setAsistenciaCompletada(false);
-
         escuelaEntity = escuelaRepository.save(escuelaEntity);
 
         Usuario usuario = new Usuario();
@@ -53,8 +54,8 @@ public class EscuelaService {
         usuario.setPassword(escuela.getUsuarioPassword());
         usuario.setEscuela(escuelaEntity);
         usuario.setRole(Role.DIRECTOR);
-        usuarioService.create(usuario);
-        
+        usuario = usuarioService.create(usuario);
+
         escuelaEntity.setUsuario(usuario);
         return escuelaEntity;
     }
@@ -79,6 +80,13 @@ public class EscuelaService {
     }
 
     public void delete(Long id) {
+        Escuela escuela = escuelaRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Escuela no encontrada"));
+
+        if (escuela.getUsuario() != null) {
+            usuarioRepository.deleteById(escuela.getUsuario().getId());
+        }
+
         escuelaRepository.deleteById(id);
     }
 }

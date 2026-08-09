@@ -16,6 +16,7 @@ public class AlumnoResponseDto {
     private String apellido;
     private String curso;
     private String dni;
+    private String nacimiento;
     private String localidad;
     private Boolean cumpleAsistencia;
     private Boolean creadoPorEscuela;
@@ -32,6 +33,7 @@ public class AlumnoResponseDto {
                 .apellido(alumno.getApellido())
                 .curso(alumno.getCurso())
                 .dni(alumno.getDni())
+                .nacimiento(alumno.getNacimiento())
                 .localidad(alumno.getLocalidad())
                 .cumpleAsistencia(alumno.getCumpleAsistencia())
                 .creadoPorEscuela(alumno.getCreadoPorEscuela())

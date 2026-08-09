@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import com.rea.sae_backend.dtos.ExcelImportResultDto;
+import com.rea.sae_backend.services.AlumnoExcelService;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,9 +29,11 @@ import java.util.stream.Collectors;
 public class AlumnoController {
 
     private final AlumnoService alumnoService;
+    private final AlumnoExcelService alumnoExcelService;
 
-    public AlumnoController(AlumnoService alumnoService) {
+    public AlumnoController(AlumnoService alumnoService, AlumnoExcelService alumnoExcelService) {
         this.alumnoService = alumnoService;
+        this.alumnoExcelService = alumnoExcelService;
     }
 
     @GetMapping
@@ -45,6 +53,12 @@ public class AlumnoController {
     @PostMapping
     public AlumnoResponseDto create(@RequestBody Alumno alumno) {
         return AlumnoResponseDto.fromEntity(alumnoService.create(alumno));
+    }
+
+    @PostMapping(value = {"/cargar-excel", "/importar-excel"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ExcelImportResultDto> cargarExcel(@RequestParam("file") MultipartFile file) {
+        ExcelImportResultDto resultado = alumnoExcelService.cargarAlumnosDesdeExcel(file);
+        return ResponseEntity.ok(resultado);
     }
 
     @PutMapping("/{id}")

@@ -25,6 +25,7 @@ public class Alumno {
     private String apellido;
     private String curso;
     private String dni;
+    private String nacimiento;
     private String localidad;
     private Boolean cumpleAsistencia = false;
     private Boolean creadoPorEscuela = false;
