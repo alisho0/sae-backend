@@ -35,7 +35,6 @@ public class EscuelaExcelService {
     private final EscuelaRepository escuelaRepository;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
-    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public EscuelaExcelImportResultDto cargarEscuelasDesdeExcel(MultipartFile file) {
@@ -109,8 +108,8 @@ public class EscuelaExcelService {
                         usuario = usuarioRepository.findByUsername(nombre).orElseGet(Usuario::new);
                     }
 
-                    usuario.setUsername(nombre);
-                    usuario.setPassword(passwordEncoder.encode(password));
+                    usuario.setUsername(cue);
+                    usuario.setPassword(password);
                     usuario.setEscuela(escuela);
                     usuario.setRole(Role.DIRECTOR);
 

@@ -44,8 +44,7 @@ class EscuelaExcelServiceTest {
 
     @BeforeEach
     void setUp() {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        escuelaExcelService = new EscuelaExcelService(escuelaRepository, usuarioRepository, usuarioService, passwordEncoder);
+        escuelaExcelService = new EscuelaExcelService(escuelaRepository, usuarioRepository, usuarioService);
     }
 
     @Test
@@ -107,8 +106,7 @@ class EscuelaExcelServiceTest {
 
         Usuario usuarioCreado = usuarioCaptor.getValue();
         assertEquals("UNSE", usuarioCreado.getUsername());
-        assertNotEquals("Unse7k", usuarioCreado.getPassword());
-        assertTrue(new BCryptPasswordEncoder().matches("Unse7k", usuarioCreado.getPassword()));
+        assertEquals("Unse7k", usuarioCreado.getPassword());
         assertEquals(Role.DIRECTOR, usuarioCreado.getRole());
     }
 }
