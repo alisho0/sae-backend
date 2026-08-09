@@ -1,13 +1,16 @@
 package com.rea.sae_backend.controllers;
 
+import com.rea.sae_backend.dtos.EscuelaExcelImportResultDto;
 import com.rea.sae_backend.dtos.EscuelaRequestDto;
 import com.rea.sae_backend.dtos.EscuelaResponseDto;
 import com.rea.sae_backend.dtos.EscuelaUpdateRequestDto;
 import com.rea.sae_backend.models.Escuela;
+import com.rea.sae_backend.services.EscuelaExcelService;
 import com.rea.sae_backend.services.EscuelaService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
@@ -29,6 +34,7 @@ import java.util.stream.Collectors;
 public class EscuelaController {
 
     private final EscuelaService escuelaService;
+    private final EscuelaExcelService escuelaExcelService;
 
     @GetMapping
     public List<EscuelaResponseDto> list() {
@@ -47,6 +53,12 @@ public class EscuelaController {
     @PostMapping
     public EscuelaResponseDto create(@RequestBody EscuelaRequestDto escuelaDto) {
         return EscuelaResponseDto.fromEntity(escuelaService.create(escuelaDto));
+    }
+
+    @PostMapping(value = {"/cargar-excel", "/importar-excel"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EscuelaExcelImportResultDto> cargarExcel(@RequestParam("file") MultipartFile file) {
+        EscuelaExcelImportResultDto resultado = escuelaExcelService.cargarEscuelasDesdeExcel(file);
+        return ResponseEntity.ok(resultado);
     }
 
     @PutMapping("/{id}")

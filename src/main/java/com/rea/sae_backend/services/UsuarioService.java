@@ -36,7 +36,7 @@ public class UsuarioService {
         if (usuario.getRole() == null) {
             usuario.setRole(Role.DIRECTOR);
         }
-        if (usuario.getPassword() != null && !usuario.getPassword().isBlank()) {
+        if (usuario.getPassword() != null && !usuario.getPassword().isBlank() && !isEncodedPassword(usuario.getPassword())) {
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         }
         return usuarioRepository.save(usuario);
@@ -46,7 +46,7 @@ public class UsuarioService {
         return usuarioRepository.findById(id)
             .map(existing -> {
                 existing.setUsername(usuarioDetails.getUsername());
-                if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isBlank()) {
+                if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isBlank() && !isEncodedPassword(usuarioDetails.getPassword())) {
                     existing.setPassword(passwordEncoder.encode(usuarioDetails.getPassword()));
                 }
                 existing.setEscuela(usuarioDetails.getEscuela());
@@ -58,11 +58,15 @@ public class UsuarioService {
                 if (usuarioDetails.getRole() == null) {
                     usuarioDetails.setRole(Role.DIRECTOR);
                 }
-                if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isBlank()) {
+                if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isBlank() && !isEncodedPassword(usuarioDetails.getPassword())) {
                     usuarioDetails.setPassword(passwordEncoder.encode(usuarioDetails.getPassword()));
                 }
                 return usuarioRepository.save(usuarioDetails);
             });
+    }
+
+    private boolean isEncodedPassword(String password) {
+        return password != null && (password.startsWith("$2a$") || password.startsWith("$2b$") || password.startsWith("$2y$"));
     }
 
     public void delete(Long id) {
