@@ -1,6 +1,5 @@
 package com.rea.sae_backend.security;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,10 +20,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        return User.builder()
-            .username(usuario.getUsername())
-            .password(usuario.getPassword())
-            .roles(usuario.getRole().name())
-            .build();
+        return CustomUserDetails.build(usuario);
     }
 }

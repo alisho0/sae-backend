@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 
 import com.rea.sae_backend.dtos.ExcelImportResultDto;
@@ -37,10 +40,11 @@ public class AlumnoController {
     }
 
     @GetMapping
-    public List<AlumnoResponseDto> list() {
-        return alumnoService.findAll().stream()
-                .map(AlumnoResponseDto::fromEntity)
-                .collect(Collectors.toList());
+    public Page<AlumnoResponseDto> list( @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return alumnoService.findAll(pageable).map(AlumnoResponseDto::fromEntity);
     }
 
     @GetMapping("/{id}")
@@ -48,6 +52,14 @@ public class AlumnoController {
         return alumnoService.findById(id)
             .map(AlumnoResponseDto::fromEntity)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Alumno no encontrado"));
+    }
+
+    @GetMapping("/escuela/{id}")
+    public List<AlumnoResponseDto> listByEscuela(@PathVariable Long id) {
+        List<Alumno> alumnos = alumnoService.findAllByEscuela(id);
+        return alumnos.stream()
+                .map(AlumnoResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @PostMapping

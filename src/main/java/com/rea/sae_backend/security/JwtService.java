@@ -26,6 +26,9 @@ public class JwtService {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof CustomUserDetails customUserDetails) {
+            claims.put("id", customUserDetails.getId());
+        }
         userDetails.getAuthorities().stream()
             .findFirst()
             .ifPresent(authority -> {
@@ -36,6 +39,10 @@ public class JwtService {
                 claims.put("role", role);
             });
         return createToken(claims, userDetails.getUsername());
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("id", Long.class));
     }
 
     public String extractRole(String token) {

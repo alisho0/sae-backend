@@ -3,6 +3,8 @@ package com.rea.sae_backend.services;
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.repositories.AlumnoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +18,16 @@ public class AlumnoService {
         this.alumnoRepository = alumnoRepository;
     }
 
-    public List<Alumno> findAll() {
-        return alumnoRepository.findAll();
+    public Page<Alumno> findAll(Pageable pageable) {
+        return alumnoRepository.findAll(pageable);
     }
 
     public Optional<Alumno> findById(Long id) {
         return alumnoRepository.findById(id);
+    }
+
+    public List<Alumno> findAllByEscuela(Long escuelaId) {
+        return alumnoRepository.findByEscuelaId(escuelaId);
     }
 
     public Alumno create(Alumno alumno) {
