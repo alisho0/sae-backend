@@ -1,7 +1,14 @@
 package com.rea.sae_backend.services;
 
+import com.rea.sae_backend.dtos.AlumnoRequestDto;
+import com.rea.sae_backend.dtos.AsistenciaRequestDto;
 import com.rea.sae_backend.models.Alumno;
+import com.rea.sae_backend.models.Escuela;
 import com.rea.sae_backend.repositories.AlumnoRepository;
+import com.rea.sae_backend.repositories.EscuelaRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,13 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AlumnoService {
 
     private final AlumnoRepository alumnoRepository;
-
-    public AlumnoService(AlumnoRepository alumnoRepository) {
-        this.alumnoRepository = alumnoRepository;
-    }
+    private final EscuelaRepository escuelaRepository;
 
     public Page<Alumno> findAll(Pageable pageable) {
         return alumnoRepository.findAll(pageable);
@@ -40,31 +45,43 @@ public class AlumnoService {
         return alumnoRepository.save(alumno);
     }
 
-    public Alumno update(Long id, Alumno alumnoDetails) {
-        return alumnoRepository.findById(id)
-            .map(existing -> {
-                existing.setNombre(alumnoDetails.getNombre());
-                existing.setApellido(alumnoDetails.getApellido());
-                existing.setCurso(alumnoDetails.getCurso());
-                existing.setDni(alumnoDetails.getDni());
-                existing.setLocalidad(alumnoDetails.getLocalidad());
-                existing.setCumpleAsistencia(
-                    alumnoDetails.getCumpleAsistencia() == null ? false : alumnoDetails.getCumpleAsistencia());
-                existing.setCreadoPorEscuela(
-                    alumnoDetails.getCreadoPorEscuela() == null ? false : alumnoDetails.getCreadoPorEscuela());
-                existing.setEscuela(alumnoDetails.getEscuela());
-                return alumnoRepository.save(existing);
-            })
-            .orElseGet(() -> {
-                alumnoDetails.setId(id);
-                if (alumnoDetails.getCumpleAsistencia() == null) {
-                    alumnoDetails.setCumpleAsistencia(false);
-                }
-                if (alumnoDetails.getCreadoPorEscuela() == null) {
-                    alumnoDetails.setCreadoPorEscuela(false);
-                }
-                return alumnoRepository.save(alumnoDetails);
-            });
+    public Boolean updateAsistencia(Long id, boolean cumpleAsistencia) {
+        Alumno a = alumnoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
+        
+        a.setCumpleAsistencia(cumpleAsistencia);
+        alumnoRepository.save(a);
+        return a.getCumpleAsistencia();
+    }
+
+    public Alumno update(Long id, AlumnoRequestDto dto) {
+
+    return alumnoRepository.findById(id)
+        .map(existing -> {
+
+            existing.setNombre(dto.getNombre());
+            existing.setApellido(dto.getApellido());
+            existing.setCurso(dto.getCurso());
+            existing.setDni(dto.getDni());
+            existing.setLocalidad(dto.getLocalidad());
+            existing.setNacimiento(dto.getNacimiento());
+
+            if (dto.getEscuelaId() != null) {
+                Escuela escuela = escuelaRepository.findById(dto.getEscuelaId())
+                    .orElseThrow(() ->
+                        new RuntimeException("Escuela no encontrada")
+                    );
+                System.out.println("Escuela encontrada: " + escuela.getNombre());
+                existing.setEscuela(escuela);
+            }
+            existing.setCumpleAsistencia(dto.getCumpleAsistencia() != null ? dto.getCumpleAsistencia() : existing.getCumpleAsistencia());
+            existing.setCreadoPorEscuela(dto.getCreadoPorEscuela() != null ? dto.getCreadoPorEscuela() : existing.getCreadoPorEscuela());
+
+            return alumnoRepository.save(existing);
+        })
+        .orElseThrow(() ->
+            new RuntimeException("Alumno no encontrado")
+        );
     }
 
     public void delete(Long id) {

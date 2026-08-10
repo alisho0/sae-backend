@@ -1,6 +1,8 @@
 package com.rea.sae_backend.controllers;
 
+import com.rea.sae_backend.dtos.AlumnoRequestDto;
 import com.rea.sae_backend.dtos.AlumnoResponseDto;
+import com.rea.sae_backend.dtos.AsistenciaRequestDto;
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.services.AlumnoService;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +64,18 @@ public class AlumnoController {
                 .collect(Collectors.toList());
     }
 
+    @PutMapping("asistencia/{id}")
+    public ResponseEntity<?> changeAsistencia(@PathVariable Long id, @RequestBody AsistenciaRequestDto asistencia) {
+        try {
+            Boolean updatedAsistencia = alumnoService.updateAsistencia(id, asistencia.isCumpleAsistencia());
+            return ResponseEntity.ok(updatedAsistencia);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("ID de alumno inválido");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @PostMapping
     public AlumnoResponseDto create(@RequestBody Alumno alumno) {
         return AlumnoResponseDto.fromEntity(alumnoService.create(alumno));
@@ -74,7 +88,7 @@ public class AlumnoController {
     }
 
     @PutMapping("/{id}")
-    public AlumnoResponseDto update(@PathVariable Long id, @RequestBody Alumno alumno) {
+    public AlumnoResponseDto update(@PathVariable Long id, @RequestBody AlumnoRequestDto alumno) {
         return AlumnoResponseDto.fromEntity(alumnoService.update(id, alumno));
     }
 
