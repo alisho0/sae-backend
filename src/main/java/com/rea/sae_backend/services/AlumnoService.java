@@ -71,7 +71,6 @@ public class AlumnoService {
                     .orElseThrow(() ->
                         new RuntimeException("Escuela no encontrada")
                     );
-                System.out.println("Escuela encontrada: " + escuela.getNombre());
                 existing.setEscuela(escuela);
             }
             existing.setCumpleAsistencia(dto.getCumpleAsistencia() != null ? dto.getCumpleAsistencia() : existing.getCumpleAsistencia());

@@ -28,6 +28,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof CustomUserDetails customUserDetails) {
             claims.put("id", customUserDetails.getId());
+            claims.put("escuela_id", customUserDetails.getEscuelaId());
         }
         userDetails.getAuthorities().stream()
             .findFirst()

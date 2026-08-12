@@ -16,6 +16,7 @@ import java.util.List;
 public class CustomUserDetails implements UserDetails {
 
     private final Long id;
+    private final Long escuelaId;
     private final String username;
 
     @JsonIgnore
@@ -30,6 +31,7 @@ public class CustomUserDetails implements UserDetails {
 
         return new CustomUserDetails(
             usuario.getId(),
+            usuario.getEscuela() != null ? usuario.getEscuela().getId() : null,
             usuario.getUsername(),
             usuario.getPassword(),
             authorities
@@ -40,6 +42,9 @@ public class CustomUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
+public Long getEscuelaId() {
+    return escuelaId;
+}
 
     @Override
     public String getPassword() {

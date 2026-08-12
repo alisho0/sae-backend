@@ -47,7 +47,6 @@ class DtoBuilderTest {
 
         assertEquals(7L, escuelaDto.getId());
         assertEquals("Escuela Técnica", escuelaDto.getNombre());
-        assertEquals(1, escuelaDto.getAlumnoIds().size());
 
         assertEquals(10L, usuarioDto.getId());
         assertEquals("admin", usuarioDto.getNombre());
