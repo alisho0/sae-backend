@@ -77,7 +77,7 @@ public class AlumnoController {
     }
 
     @PostMapping
-    public AlumnoResponseDto create(@RequestBody Alumno alumno) {
+    public AlumnoResponseDto create(@RequestBody AlumnoRequestDto alumno) {
         return AlumnoResponseDto.fromEntity(alumnoService.create(alumno));
     }
 

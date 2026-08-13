@@ -29,6 +29,7 @@ public class Alumno {
     private String localidad;
     private Boolean cumpleAsistencia = false;
     private Boolean creadoPorEscuela = false;
+    private Boolean editadoPorEscuela = false;
 
     @ManyToOne
     @JsonIgnoreProperties("alumnos")

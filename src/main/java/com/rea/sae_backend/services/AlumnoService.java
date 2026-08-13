@@ -35,14 +35,28 @@ public class AlumnoService {
         return alumnoRepository.findByEscuelaId(escuelaId);
     }
 
-    public Alumno create(Alumno alumno) {
+    public Alumno create(AlumnoRequestDto alumno) {
         if (alumno.getCumpleAsistencia() == null) {
             alumno.setCumpleAsistencia(false);
         }
         if (alumno.getCreadoPorEscuela() == null) {
             alumno.setCreadoPorEscuela(false);
         }
-        return alumnoRepository.save(alumno);
+        Alumno alumnoModel = new Alumno();
+        alumnoModel.setNombre(alumno.getNombre());
+        alumnoModel.setApellido(alumno.getApellido());
+        alumnoModel.setCurso(alumno.getCurso());
+        alumnoModel.setDni(alumno.getDni());
+        alumnoModel.setLocalidad(alumno.getLocalidad());
+        alumnoModel.setNacimiento(alumno.getNacimiento());
+        alumnoModel.setCumpleAsistencia(alumno.getCumpleAsistencia());
+        alumnoModel.setCreadoPorEscuela(alumno.getCreadoPorEscuela());
+
+        Escuela escuela = escuelaRepository.findById(alumno.getEscuelaId())
+            .orElseThrow(() -> new RuntimeException("Escuela no encontrada"));
+        alumnoModel.setEscuela(escuela);
+
+        return alumnoRepository.save(alumnoModel);
     }
 
     public Boolean updateAsistencia(Long id, boolean cumpleAsistencia) {
@@ -75,6 +89,7 @@ public class AlumnoService {
             }
             existing.setCumpleAsistencia(dto.getCumpleAsistencia() != null ? dto.getCumpleAsistencia() : existing.getCumpleAsistencia());
             existing.setCreadoPorEscuela(dto.getCreadoPorEscuela() != null ? dto.getCreadoPorEscuela() : existing.getCreadoPorEscuela());
+            existing.setEditadoPorEscuela(dto.getEditadoPorEscuela() != null ? dto.getEditadoPorEscuela() : existing.getEditadoPorEscuela());
 
             return alumnoRepository.save(existing);
         })

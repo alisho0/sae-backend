@@ -17,5 +17,6 @@ public class AlumnoRequestDto {
     private String localidad;
     private Boolean cumpleAsistencia;
     private Boolean creadoPorEscuela;
+    private Boolean editadoPorEscuela;
     private Long escuelaId;
 }

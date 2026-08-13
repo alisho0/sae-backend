@@ -20,6 +20,7 @@ public class AlumnoResponseDto {
     private String localidad;
     private Boolean cumpleAsistencia;
     private Boolean creadoPorEscuela;
+    private Boolean editadoPorEscuela;
     private Long escuelaId;
 
     public static AlumnoResponseDto fromEntity(Alumno alumno) {
@@ -38,6 +39,7 @@ public class AlumnoResponseDto {
                 .cumpleAsistencia(alumno.getCumpleAsistencia())
                 .creadoPorEscuela(alumno.getCreadoPorEscuela())
                 .escuelaId(alumno.getEscuela() != null ? alumno.getEscuela().getId() : null)
+                .editadoPorEscuela(alumno.getEditadoPorEscuela())
                 .build();
     }
 }
