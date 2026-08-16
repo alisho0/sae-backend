@@ -89,4 +89,13 @@ public class EscuelaService {
 
         escuelaRepository.deleteById(id);
     }
+
+    public Boolean cerrarAsistencia(Long id) {
+        Escuela escuela = escuelaRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Escuela no encontrada"));
+
+        escuela.setAsistenciaCompletada(true);
+        escuelaRepository.save(escuela);
+        return escuela.getAsistenciaCompletada();
+    }
 }

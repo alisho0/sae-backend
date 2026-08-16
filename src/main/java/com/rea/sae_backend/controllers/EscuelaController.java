@@ -71,4 +71,10 @@ public class EscuelaController {
         escuelaService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/cerrar-asistencia")
+    public ResponseEntity<?> cerrarAsistencia(@PathVariable Long id) {
+        Boolean asistenciaCerrada = escuelaService.cerrarAsistencia(id);
+        return ResponseEntity.ok(asistenciaCerrada);
+    }
 }
