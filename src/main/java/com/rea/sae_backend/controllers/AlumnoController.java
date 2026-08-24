@@ -5,6 +5,9 @@ import com.rea.sae_backend.dtos.AlumnoResponseDto;
 import com.rea.sae_backend.dtos.AsistenciaRequestDto;
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.services.AlumnoService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 
 import com.rea.sae_backend.dtos.ExcelImportResultDto;
-import com.rea.sae_backend.services.AlumnoExcelService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,15 +33,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/alumnos")
+@RequiredArgsConstructor
 public class AlumnoController {
 
     private final AlumnoService alumnoService;
-    private final AlumnoExcelService alumnoExcelService;
-
-    public AlumnoController(AlumnoService alumnoService, AlumnoExcelService alumnoExcelService) {
-        this.alumnoService = alumnoService;
-        this.alumnoExcelService = alumnoExcelService;
-    }
 
     @GetMapping
     public Page<AlumnoResponseDto> list( @RequestParam(defaultValue = "0") int page,
@@ -94,7 +91,7 @@ public class AlumnoController {
 
     @PostMapping(value = {"/cargar-excel", "/importar-excel"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ExcelImportResultDto> cargarExcel(@RequestParam("file") MultipartFile file) {
-        ExcelImportResultDto resultado = alumnoExcelService.cargarAlumnosDesdeExcel(file);
+        ExcelImportResultDto resultado = alumnoService.cargarAlumnosDesdeExcel(file);
         return ResponseEntity.ok(resultado);
     }
 
