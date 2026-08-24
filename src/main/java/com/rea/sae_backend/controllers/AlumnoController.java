@@ -43,10 +43,21 @@ public class AlumnoController {
 
     @GetMapping
     public Page<AlumnoResponseDto> list( @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "20") int size) {
+                                         @RequestParam(defaultValue = "20") int size,
+                                         @RequestParam(required = false) Boolean cumpleAsistencia,
+                                         @RequestParam(required = false) String dni,
+                                         @RequestParam(required = false) Long escuelaId
+                                        ) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return alumnoService.findAll(pageable).map(AlumnoResponseDto::fromEntity);
+        return alumnoService
+            .findAll(
+                pageable, 
+                cumpleAsistencia,
+                dni,
+                escuelaId
+                )
+            .map(AlumnoResponseDto::fromEntity);
     }
 
     @GetMapping("/{id}")

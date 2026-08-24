@@ -2,13 +2,14 @@ package com.rea.sae_backend.repositories;
 
 import com.rea.sae_backend.models.Alumno;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
+public interface AlumnoRepository extends JpaRepository<Alumno, Long>, JpaSpecificationExecutor<Alumno> {
     Optional<Alumno> findByDni(String dni);
     List<Alumno> findByEscuelaId(Long escuelaId);
 }

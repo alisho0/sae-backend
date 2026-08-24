@@ -6,12 +6,14 @@ import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
 import com.rea.sae_backend.repositories.AlumnoRepository;
 import com.rea.sae_backend.repositories.EscuelaRepository;
+import com.rea.sae_backend.specifications.AlumnoSpecification;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +25,12 @@ public class AlumnoService {
     private final AlumnoRepository alumnoRepository;
     private final EscuelaRepository escuelaRepository;
 
-    public Page<Alumno> findAll(Pageable pageable) {
-        return alumnoRepository.findAll(pageable);
+    public Page<Alumno> findAll(Pageable pageable, Boolean cumpleAsistencia, String dni, Long escuelaId) {
+        Specification<Alumno> spec = Specification
+                .where(AlumnoSpecification.dniEquals(dni))
+                .and(AlumnoSpecification.cumpleAsistencia(cumpleAsistencia))
+                .and(AlumnoSpecification.escuelaIdEquals(escuelaId));
+        return alumnoRepository.findAll(spec, pageable);
     }
 
     public Optional<Alumno> findById(Long id) {
