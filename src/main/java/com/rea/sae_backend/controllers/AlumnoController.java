@@ -3,7 +3,7 @@ package com.rea.sae_backend.controllers;
 import com.rea.sae_backend.dtos.AlumnoRequestDto;
 import com.rea.sae_backend.dtos.AlumnoResponseDto;
 import com.rea.sae_backend.dtos.AsistenciaRequestDto;
-import com.rea.sae_backend.models.Alumno;
+import com.rea.sae_backend.models.RegistroAsistencia;
 import com.rea.sae_backend.services.AlumnoService;
 
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,8 @@ public class AlumnoController {
                                          @RequestParam(defaultValue = "20") int size,
                                          @RequestParam(required = false) Boolean cumpleAsistencia,
                                          @RequestParam(required = false) String dni,
-                                         @RequestParam(required = false) Long escuelaId
+                                         @RequestParam(required = false) Long escuelaId,
+                                         @RequestParam(required = false) String periodo
                                         ) {
 
         Pageable pageable = PageRequest.of(page, size);
@@ -52,7 +53,8 @@ public class AlumnoController {
                 pageable, 
                 cumpleAsistencia,
                 dni,
-                escuelaId
+                escuelaId,
+                periodo
                 )
             .map(AlumnoResponseDto::fromEntity);
     }
@@ -65,9 +67,10 @@ public class AlumnoController {
     }
 
     @GetMapping("/escuela/{id}")
-    public List<AlumnoResponseDto> listByEscuela(@PathVariable Long id) {
-        List<Alumno> alumnos = alumnoService.findAllByEscuela(id);
-        return alumnos.stream()
+    public List<AlumnoResponseDto> listByEscuela(@PathVariable Long id,
+                                                 @RequestParam(required = false) String periodo) {
+        List<RegistroAsistencia> registros = alumnoService.findAllByEscuela(id, periodo);
+        return registros.stream()
                 .map(AlumnoResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -90,8 +93,9 @@ public class AlumnoController {
     }
 
     @PostMapping(value = {"/cargar-excel", "/importar-excel"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ExcelImportResultDto> cargarExcel(@RequestParam("file") MultipartFile file) {
-        ExcelImportResultDto resultado = alumnoService.cargarAlumnosDesdeExcel(file);
+    public ResponseEntity<ExcelImportResultDto> cargarExcel(@RequestParam("file") MultipartFile file,
+                                                            @RequestParam(required = false) String periodo) {
+        ExcelImportResultDto resultado = alumnoService.cargarAlumnosDesdeExcel(file, periodo);
         return ResponseEntity.ok(resultado);
     }
 

@@ -2,6 +2,7 @@ package com.rea.sae_backend.dtos;
 
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
+import com.rea.sae_backend.models.RegistroAsistencia;
 import com.rea.sae_backend.models.Usuario;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +24,19 @@ class DtoBuilderTest {
         alumno.setId(1L);
         alumno.setNombre("Ana");
         alumno.setApellido("Pérez");
-        alumno.setCurso("5to");
         alumno.setDni("40111222");
         alumno.setLocalidad("San Martín");
-        alumno.setCumpleAsistencia(true);
-        alumno.setCreadoPorEscuela(true);
         alumno.setEscuela(escuela);
         escuela.setAlumnos(List.of(alumno));
+
+        RegistroAsistencia registro = new RegistroAsistencia();
+        registro.setId(5L);
+        registro.setPeriodo("09-2026");
+        registro.setCurso("5to");
+        registro.setCumpleAsistencia(true);
+        registro.setCreadoPorEscuela(true);
+        registro.setAlumno(alumno);
+        alumno.setRegistros(List.of(registro));
 
         Usuario usuario = new Usuario();
         usuario.setId(10L);
@@ -37,12 +44,14 @@ class DtoBuilderTest {
         usuario.setPassword("secret");
         usuario.setEscuela(escuela);
 
-        AlumnoResponseDto alumnoDto = AlumnoResponseDto.fromEntity(alumno);
+        AlumnoResponseDto alumnoDto = AlumnoResponseDto.fromEntity(registro);
         EscuelaResponseDto escuelaDto = EscuelaResponseDto.fromEntity(escuela);
         UsuarioResponseDto usuarioDto = UsuarioResponseDto.fromEntity(usuario);
 
-        assertEquals(1L, alumnoDto.getId());
+        assertEquals(5L, alumnoDto.getId());
+        assertEquals("09-2026", alumnoDto.getPeriodo());
         assertEquals("Ana", alumnoDto.getNombre());
+        assertEquals("5to", alumnoDto.getCurso());
         assertEquals(7L, alumnoDto.getEscuelaId());
 
         assertEquals(7L, escuelaDto.getId());

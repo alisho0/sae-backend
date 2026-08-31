@@ -1,6 +1,7 @@
 package com.rea.sae_backend.dtos;
 
 import com.rea.sae_backend.models.Alumno;
+import com.rea.sae_backend.models.RegistroAsistencia;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AlumnoResponseDto {
     private Long id;
+    private String periodo;
     private String nombre;
     private String apellido;
     private String curso;
@@ -24,24 +26,25 @@ public class AlumnoResponseDto {
     private String escuela;
     private Long escuelaId;
 
-    public static AlumnoResponseDto fromEntity(Alumno alumno) {
-        if (alumno == null) {
+    public static AlumnoResponseDto fromEntity(RegistroAsistencia registro) {
+        if (registro == null) {
             return null;
         }
-
+        Alumno alumno = registro.getAlumno();
         return AlumnoResponseDto.builder()
-                .id(alumno.getId())
-                .nombre(alumno.getNombre())
-                .apellido(alumno.getApellido())
-                .curso(alumno.getCurso())
-                .dni(alumno.getDni())
-                .nacimiento(alumno.getNacimiento())
-                .localidad(alumno.getLocalidad())
-                .cumpleAsistencia(alumno.getCumpleAsistencia())
-                .creadoPorEscuela(alumno.getCreadoPorEscuela())
-                .escuela(alumno.getEscuela() != null ? alumno.getEscuela().getNombre() : null)
-                .escuelaId(alumno.getEscuela() != null ? alumno.getEscuela().getId() : null)
-                .editadoPorEscuela(alumno.getEditadoPorEscuela())
+                .id(registro.getId())
+                .periodo(registro.getPeriodo())
+                .nombre(alumno != null ? alumno.getNombre() : null)
+                .apellido(alumno != null ? alumno.getApellido() : null)
+                .curso(registro.getCurso())
+                .dni(alumno != null ? alumno.getDni() : null)
+                .nacimiento(alumno != null ? alumno.getNacimiento() : null)
+                .localidad(alumno != null ? alumno.getLocalidad() : null)
+                .cumpleAsistencia(registro.getCumpleAsistencia())
+                .creadoPorEscuela(registro.getCreadoPorEscuela())
+                .escuela(alumno != null && alumno.getEscuela() != null ? alumno.getEscuela().getNombre() : null)
+                .escuelaId(alumno != null && alumno.getEscuela() != null ? alumno.getEscuela().getId() : null)
+                .editadoPorEscuela(registro.getEditadoPorEscuela())
                 .build();
     }
 }

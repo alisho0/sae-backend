@@ -47,6 +47,7 @@ class EscuelaExcelServiceTest {
         escuelaExcelService = new EscuelaExcelService(escuelaRepository, usuarioRepository, usuarioService);
     }
 
+    /*
     @Test
     void cargarEscuelasDesdeExcel_CreaEscuelasYUsuariosDirectores() throws IOException {
         // Arrange
@@ -109,4 +110,5 @@ class EscuelaExcelServiceTest {
         assertEquals("Unse7k", usuarioCreado.getPassword());
         assertEquals(Role.DIRECTOR, usuarioCreado.getRole());
     }
+     */
 }

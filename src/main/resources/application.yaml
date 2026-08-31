@@ -19,3 +19,6 @@ spring:
 jwt:
   secret: ${JWT_SECRET:c2VjcmV0LWJhc2U2NC1wYXlsb2FkLXNlY3JldC1rZXk=}
   expiration-ms: 86400000
+
+app:
+  periodo-activo: ${PERIODO_ACTIVO:09-2026}

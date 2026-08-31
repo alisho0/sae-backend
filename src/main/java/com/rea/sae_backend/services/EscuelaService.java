@@ -2,11 +2,13 @@ package com.rea.sae_backend.services;
 
 import com.rea.sae_backend.dtos.EscuelaRequestDto;
 import com.rea.sae_backend.dtos.EscuelaUpdateRequestDto;
+import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
+import com.rea.sae_backend.models.RegistroAsistencia;
 import com.rea.sae_backend.models.Role;
 import com.rea.sae_backend.models.Usuario;
-import com.rea.sae_backend.repositories.AlumnoRepository;
 import com.rea.sae_backend.repositories.EscuelaRepository;
+import com.rea.sae_backend.repositories.RegistroAsistenciaRepository;
 import com.rea.sae_backend.repositories.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +29,7 @@ public class EscuelaService {
 
     private final EscuelaRepository escuelaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final AlumnoRepository alumnoRepository;
+    private final RegistroAsistenciaRepository registroRepository;
     private final UsuarioService usuarioService;
 
     public List<Escuela> findAll() {
@@ -69,7 +73,12 @@ public class EscuelaService {
 
                 List<Long> alumnoIds = escuelaDetails.getAlumnoIds();
                 if (alumnoIds != null) {
-                    existing.setAlumnos(alumnoRepository.findAllById(alumnoIds));
+                    List<Alumno> alumnos = registroRepository.findAllById(alumnoIds).stream()
+                            .map(RegistroAsistencia::getAlumno)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .collect(Collectors.toList());
+                    existing.setAlumnos(alumnos);
                 }
                 Usuario usuario = usuarioRepository.findById(escuelaDetails.getUsuarioId())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));

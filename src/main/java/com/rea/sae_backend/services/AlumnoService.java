@@ -1,14 +1,16 @@
 package com.rea.sae_backend.services;
 
+import com.rea.sae_backend.config.PeriodoConfig;
 import com.rea.sae_backend.dtos.AlumnoRequestDto;
 import com.rea.sae_backend.dtos.AlumnoResponseDto;
-import com.rea.sae_backend.dtos.AsistenciaRequestDto;
 import com.rea.sae_backend.dtos.ExcelImportResultDto;
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
+import com.rea.sae_backend.models.RegistroAsistencia;
 import com.rea.sae_backend.repositories.AlumnoRepository;
 import com.rea.sae_backend.repositories.EscuelaRepository;
-import com.rea.sae_backend.specifications.AlumnoSpecification;
+import com.rea.sae_backend.repositories.RegistroAsistenciaRepository;
+import com.rea.sae_backend.specifications.RegistroAsistenciaSpecification;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,98 +43,122 @@ import java.util.Optional;
 public class AlumnoService {
 
     private final AlumnoRepository alumnoRepository;
+    private final RegistroAsistenciaRepository registroRepository;
     private final EscuelaRepository escuelaRepository;
+    private final PeriodoConfig periodoConfig;
 
-    public Page<Alumno> findAll(Pageable pageable, Boolean cumpleAsistencia, String dni, Long escuelaId) {
-        Specification<Alumno> spec = Specification
-                .where(AlumnoSpecification.dniEquals(dni))
-                .and(AlumnoSpecification.cumpleAsistencia(cumpleAsistencia))
-                .and(AlumnoSpecification.escuelaIdEquals(escuelaId));
-        return alumnoRepository.findAll(spec, pageable);
+    public Page<RegistroAsistencia> findAll(Pageable pageable, Boolean cumpleAsistencia, String dni, Long escuelaId, String periodo) {
+        String p = periodoConfig.resolve(periodo);
+        Specification<RegistroAsistencia> spec = Specification
+                .where(RegistroAsistenciaSpecification.periodoEquals(p))
+                .and(RegistroAsistenciaSpecification.dniEquals(dni))
+                .and(RegistroAsistenciaSpecification.cumpleAsistencia(cumpleAsistencia))
+                .and(RegistroAsistenciaSpecification.escuelaIdEquals(escuelaId));
+        return registroRepository.findAll(spec, pageable);
     }
 
-    public Optional<Alumno> findById(Long id) {
-        return alumnoRepository.findById(id);
+    public Optional<RegistroAsistencia> findById(Long id) {
+        return registroRepository.findById(id);
     }
 
-    public List<Alumno> findAllByEscuela(Long escuelaId) {
-        return alumnoRepository.findByEscuelaId(escuelaId);
+    public List<RegistroAsistencia> findAllByEscuela(Long escuelaId, String periodo) {
+        String p = periodoConfig.resolve(periodo);
+        Specification<RegistroAsistencia> spec = Specification
+                .where(RegistroAsistenciaSpecification.periodoEquals(p))
+                .and(RegistroAsistenciaSpecification.escuelaIdEquals(escuelaId));
+        return registroRepository.findAll(spec);
     }
 
-    public Alumno create(AlumnoRequestDto alumno) {
-        if (alumno.getCumpleAsistencia() == null) {
-            alumno.setCumpleAsistencia(false);
+    public RegistroAsistencia create(AlumnoRequestDto alumno) {
+        String periodo = periodoConfig.resolve(alumno.getPeriodo());
+
+        Alumno alumnoModel;
+        if (alumno.getDni() != null && !alumno.getDni().isBlank()) {
+            alumnoModel = alumnoRepository.findByDni(alumno.getDni()).orElseGet(Alumno::new);
+        } else {
+            alumnoModel = new Alumno();
         }
-        if (alumno.getCreadoPorEscuela() == null) {
-            alumno.setCreadoPorEscuela(false);
-        }
-        Alumno alumnoModel = new Alumno();
         alumnoModel.setNombre(alumno.getNombre());
         alumnoModel.setApellido(alumno.getApellido());
-        alumnoModel.setCurso(alumno.getCurso());
         alumnoModel.setDni(alumno.getDni());
-        alumnoModel.setLocalidad(alumno.getLocalidad());
         alumnoModel.setNacimiento(alumno.getNacimiento());
-        alumnoModel.setCumpleAsistencia(alumno.getCumpleAsistencia());
-        alumnoModel.setCreadoPorEscuela(alumno.getCreadoPorEscuela());
+        alumnoModel.setLocalidad(alumno.getLocalidad());
+        if (alumno.getEscuelaId() != null) {
+            Escuela escuela = escuelaRepository.findById(alumno.getEscuelaId())
+                .orElseThrow(() -> new RuntimeException("Escuela no encontrada"));
+            alumnoModel.setEscuela(escuela);
+        }
+        alumnoModel = alumnoRepository.save(alumnoModel);
 
-        Escuela escuela = escuelaRepository.findById(alumno.getEscuelaId())
-            .orElseThrow(() -> new RuntimeException("Escuela no encontrada"));
-        alumnoModel.setEscuela(escuela);
+        RegistroAsistencia registro = registroRepository
+                .findByAlumnoIdAndPeriodo(alumnoModel.getId(), periodo)
+                .orElseGet(RegistroAsistencia::new);
+        registro.setAlumno(alumnoModel);
+        registro.setPeriodo(periodo);
+        registro.setCurso(alumno.getCurso());
+        registro.setCumpleAsistencia(alumno.getCumpleAsistencia() != null ? alumno.getCumpleAsistencia() : false);
+        registro.setCreadoPorEscuela(alumno.getCreadoPorEscuela() != null ? alumno.getCreadoPorEscuela() : false);
+        registro.setEditadoPorEscuela(alumno.getEditadoPorEscuela() != null ? alumno.getEditadoPorEscuela() : false);
 
-        return alumnoRepository.save(alumnoModel);
+        return registroRepository.save(registro);
     }
 
     public Boolean updateAsistencia(Long id, boolean cumpleAsistencia) {
-        Alumno a = alumnoRepository.findById(id)
+        RegistroAsistencia registro = registroRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
-        
-        a.setCumpleAsistencia(cumpleAsistencia);
-        alumnoRepository.save(a);
-        return a.getCumpleAsistencia();
+
+        registro.setCumpleAsistencia(cumpleAsistencia);
+        registroRepository.save(registro);
+        return registro.getCumpleAsistencia();
     }
 
-    public Alumno update(Long id, AlumnoRequestDto dto) {
+    public RegistroAsistencia update(Long id, AlumnoRequestDto dto) {
 
-    return alumnoRepository.findById(id)
-        .map(existing -> {
+        return registroRepository.findById(id)
+            .map(registro -> {
 
-            existing.setNombre(dto.getNombre());
-            existing.setApellido(dto.getApellido());
-            existing.setCurso(dto.getCurso());
-            existing.setDni(dto.getDni());
-            existing.setLocalidad(dto.getLocalidad());
-            existing.setNacimiento(dto.getNacimiento());
+                Alumno alumnoModel = registro.getAlumno();
+                if (alumnoModel == null) {
+                    throw new RuntimeException("Alumno no encontrado");
+                }
+                alumnoModel.setNombre(dto.getNombre());
+                alumnoModel.setApellido(dto.getApellido());
+                alumnoModel.setDni(dto.getDni());
+                alumnoModel.setNacimiento(dto.getNacimiento());
+                alumnoModel.setLocalidad(dto.getLocalidad());
 
-            if (dto.getEscuelaId() != null) {
-                Escuela escuela = escuelaRepository.findById(dto.getEscuelaId())
-                    .orElseThrow(() ->
-                        new RuntimeException("Escuela no encontrada")
-                    );
-                existing.setEscuela(escuela);
-            }
-            existing.setCumpleAsistencia(dto.getCumpleAsistencia() != null ? dto.getCumpleAsistencia() : existing.getCumpleAsistencia());
-            existing.setCreadoPorEscuela(dto.getCreadoPorEscuela() != null ? dto.getCreadoPorEscuela() : existing.getCreadoPorEscuela());
-            existing.setEditadoPorEscuela(dto.getEditadoPorEscuela() != null ? dto.getEditadoPorEscuela() : existing.getEditadoPorEscuela());
+                if (dto.getEscuelaId() != null) {
+                    Escuela escuela = escuelaRepository.findById(dto.getEscuelaId())
+                        .orElseThrow(() ->
+                            new RuntimeException("Escuela no encontrada")
+                        );
+                    alumnoModel.setEscuela(escuela);
+                }
+                alumnoRepository.save(alumnoModel);
 
-            return alumnoRepository.save(existing);
-        })
-        .orElseThrow(() ->
-            new RuntimeException("Alumno no encontrado")
-        );
+                registro.setCurso(dto.getCurso());
+                registro.setCumpleAsistencia(dto.getCumpleAsistencia() != null ? dto.getCumpleAsistencia() : registro.getCumpleAsistencia());
+                registro.setCreadoPorEscuela(dto.getCreadoPorEscuela() != null ? dto.getCreadoPorEscuela() : registro.getCreadoPorEscuela());
+                registro.setEditadoPorEscuela(dto.getEditadoPorEscuela() != null ? dto.getEditadoPorEscuela() : registro.getEditadoPorEscuela());
+
+                return registroRepository.save(registro);
+            })
+            .orElseThrow(() ->
+                new RuntimeException("Alumno no encontrado")
+            );
     }
 
     public void delete(Long id) {
-        alumnoRepository.deleteById(id);
+        registroRepository.deleteById(id);
     }
 
-    
-
     @Transactional
-    public ExcelImportResultDto cargarAlumnosDesdeExcel(MultipartFile file) {
+    public ExcelImportResultDto cargarAlumnosDesdeExcel(MultipartFile file, String periodo) {
         if (file == null || file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo subido está vacío o es nulo");
         }
+
+        String periodoResuelto = periodoConfig.resolve(periodo);
 
         List<AlumnoResponseDto> alumnosCargados = new ArrayList<>();
         List<String> errores = new ArrayList<>();
@@ -204,12 +230,19 @@ public class AlumnoService {
                     alumno.setNombre(nombre);
                     alumno.setNacimiento(nacimiento);
                     alumno.setLocalidad(localidad);
-                    alumno.setCurso(curso);
-                    alumno.setCumpleAsistencia(cumpleAsistencia != null ? cumpleAsistencia : false);
-                    alumno.setCreadoPorEscuela(false);
                     alumno.setEscuela(escuela);
+                    alumno = alumnoRepository.save(alumno);
 
-                    Alumno guardado = alumnoRepository.save(alumno);
+                    RegistroAsistencia registro = registroRepository
+                            .findByAlumnoIdAndPeriodo(alumno.getId(), periodoResuelto)
+                            .orElseGet(RegistroAsistencia::new);
+                    registro.setAlumno(alumno);
+                    registro.setPeriodo(periodoResuelto);
+                    registro.setCurso(curso);
+                    registro.setCumpleAsistencia(cumpleAsistencia != null ? cumpleAsistencia : false);
+                    registro.setCreadoPorEscuela(false);
+                    RegistroAsistencia guardado = registroRepository.save(registro);
+
                     alumnosCargados.add(AlumnoResponseDto.fromEntity(guardado));
                     exitosos++;
 

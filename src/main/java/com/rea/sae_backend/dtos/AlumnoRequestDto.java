@@ -15,6 +15,7 @@ public class AlumnoRequestDto {
     private String dni;
     private String nacimiento;
     private String localidad;
+    private String periodo;
     private Boolean cumpleAsistencia;
     private Boolean creadoPorEscuela;
     private Boolean editadoPorEscuela;
