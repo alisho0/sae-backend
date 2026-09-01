@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Table(
         name = "registro_asistencia",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_alumno_periodo", columnNames = {"alumno_id", "periodo"})
+                @UniqueConstraint(name = "uk_alumno_periodo", columnNames = {"alumno_id", "periodo_id"})
         }
 )
 @NoArgsConstructor
@@ -34,7 +34,8 @@ public class RegistroAsistencia {
     @JsonIgnoreProperties("registros")
     private Alumno alumno;
 
-    private String periodo;
+    @ManyToOne
+    private Periodo periodo;
 
     private String curso;
     private Boolean cumpleAsistencia = false;
