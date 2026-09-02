@@ -44,9 +44,11 @@ public class PeriodoService {
      que se crea por defecto con la variable de entorno.
      */
     @Transactional
-    private Periodo getPeriodoActivo() {
+    public Periodo getPeriodoActivo() {
         Optional<PeriodoActual> periodoActual = periodoActualRepository.findById(1L);
-        if (periodoActual.isPresent() && periodoActual.get().getPeriodo().getValor() != null) {
+        if (periodoActual.isPresent()
+                && periodoActual.get().getPeriodo() != null
+                && periodoActual.get().getPeriodo().getValor() != null) {
             return periodoActual.get().getPeriodo();
         }
         String valorSemilla = periodoConfig.getPeriodoActivo();
@@ -56,6 +58,20 @@ public class PeriodoService {
         if (periodo == null) {
             throw new IllegalArgumentException("No hay un periodo activo configurado");
         }
+        return periodo;
+    }
+
+    /*
+        Setea el periodo activo del sistema: busca o crea el Periodo por valor,
+        y persiste el puntero PeriodoActual (id=1) apuntando a él.
+     */
+    @Transactional
+    public Periodo setPeriodoActivo(String valor) {
+        Periodo periodo = getOrCreateByValor(valor);
+        PeriodoActual actual = periodoActualRepository.findById(1L)
+                .orElseGet(PeriodoActual::new);
+        actual.setPeriodo(periodo);
+        periodoActualRepository.save(actual);
         return periodo;
     }
 

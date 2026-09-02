@@ -19,7 +19,6 @@ class DtoBuilderTest {
         escuela.setId(7L);
         escuela.setNombre("Escuela Técnica");
         escuela.setCue("123456");
-        escuela.setAsistenciaCompletada(true);
 
         Alumno alumno = new Alumno();
         alumno.setId(1L);

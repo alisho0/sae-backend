@@ -6,6 +6,7 @@ import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
 import com.rea.sae_backend.repositories.AlumnoRepository;
 import com.rea.sae_backend.repositories.EscuelaRepository;
+import com.rea.sae_backend.repositories.PeriodoEscuelaRepository;
 import com.rea.sae_backend.repositories.RegistroAsistenciaRepository;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -43,13 +44,16 @@ class AlumnoExcelServiceTest {
     private PeriodoConfig periodoConfig;
 
     @Mock
+    private PeriodoEscuelaRepository periodoEscuelaRepository;
+
+    @Mock
     private PeriodoService periodoService;
 
     private AlumnoService alumnoService;
 
     @BeforeEach
     void setUp() {
-        alumnoService = new AlumnoService(alumnoRepository, registroRepository, escuelaRepository, periodoConfig, periodoService);
+        alumnoService = new AlumnoService(alumnoRepository, registroRepository, escuelaRepository, periodoConfig, periodoEscuelaRepository, periodoService);
     }
 
     /*

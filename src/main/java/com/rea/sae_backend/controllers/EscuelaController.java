@@ -39,20 +39,20 @@ public class EscuelaController {
     @GetMapping
     public List<EscuelaResponseDto> list() {
         return escuelaService.findAll().stream()
-                .map(EscuelaResponseDto::fromEntity)
+                .map(escuelaService::toResponseDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
     public EscuelaResponseDto getById(@PathVariable Long id) {
         return escuelaService.findById(id)
-            .map(EscuelaResponseDto::fromEntity)
+            .map(escuelaService::toResponseDto)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Escuela no encontrada"));
     }
 
     @PostMapping
     public EscuelaResponseDto create(@RequestBody EscuelaRequestDto escuelaDto) {
-        return EscuelaResponseDto.fromEntity(escuelaService.create(escuelaDto));
+        return escuelaService.toResponseDto(escuelaService.create(escuelaDto));
     }
 
     @PostMapping(value = {"/cargar-excel", "/importar-excel"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -63,7 +63,7 @@ public class EscuelaController {
 
     @PutMapping("/{id}")
     public EscuelaResponseDto update(@PathVariable Long id, @RequestBody EscuelaUpdateRequestDto escuelaDto) {
-        return EscuelaResponseDto.fromEntity(escuelaService.update(id, escuelaDto));
+        return escuelaService.toResponseDto(escuelaService.update(id, escuelaDto));
     }
 
     @DeleteMapping("/{id}")

@@ -4,12 +4,10 @@ import com.rea.sae_backend.config.PeriodoConfig;
 import com.rea.sae_backend.dtos.AlumnoRequestDto;
 import com.rea.sae_backend.dtos.AlumnoResponseDto;
 import com.rea.sae_backend.dtos.ExcelImportResultDto;
-import com.rea.sae_backend.models.Alumno;
-import com.rea.sae_backend.models.Escuela;
-import com.rea.sae_backend.models.Periodo;
-import com.rea.sae_backend.models.RegistroAsistencia;
+import com.rea.sae_backend.models.*;
 import com.rea.sae_backend.repositories.AlumnoRepository;
 import com.rea.sae_backend.repositories.EscuelaRepository;
+import com.rea.sae_backend.repositories.PeriodoEscuelaRepository;
 import com.rea.sae_backend.repositories.RegistroAsistenciaRepository;
 import com.rea.sae_backend.specifications.RegistroAsistenciaSpecification;
 
@@ -25,6 +23,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -46,7 +45,6 @@ public class AlumnoService {
     private final AlumnoRepository alumnoRepository;
     private final RegistroAsistenciaRepository registroRepository;
     private final EscuelaRepository escuelaRepository;
-    private final PeriodoConfig periodoConfig;
     private final PeriodoService periodoService;
 
     public Page<RegistroAsistencia> findAll(Pageable pageable, Boolean cumpleAsistencia, String dni, Long escuelaId, String periodo) {
@@ -160,8 +158,10 @@ public class AlumnoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo subido está vacío o es nulo");
         }
 
+        if (StringUtils.hasText(periodo)) {
+            periodoService.setPeriodoActivo(periodo);
+        }
         Periodo periodoResuelto = periodoService.resolve(periodo);
-
         List<AlumnoResponseDto> alumnosCargados = new ArrayList<>();
         List<String> errores = new ArrayList<>();
         int totalFilas = 0;
@@ -244,7 +244,6 @@ public class AlumnoService {
                     registro.setCumpleAsistencia(cumpleAsistencia != null ? cumpleAsistencia : false);
                     registro.setCreadoPorEscuela(false);
                     RegistroAsistencia guardado = registroRepository.save(registro);
-
                     alumnosCargados.add(AlumnoResponseDto.fromEntity(guardado));
                     exitosos++;
 

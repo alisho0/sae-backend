@@ -21,6 +21,10 @@ public class EscuelaResponseDto {
     private Boolean asistenciaCompletada;
 
     public static EscuelaResponseDto fromEntity(Escuela escuela) {
+        return fromEntity(escuela, null);
+    }
+
+    public static EscuelaResponseDto fromEntity(Escuela escuela, Boolean asistenciaCompletada) {
         if (escuela == null) {
             return null;
         }
@@ -29,7 +33,7 @@ public class EscuelaResponseDto {
                 .id(escuela.getId())
                 .nombre(escuela.getNombre())
                 .cue(escuela.getCue())
-                .asistenciaCompletada(escuela.getAsistenciaCompletada())
+                .asistenciaCompletada(asistenciaCompletada)
                 .build();
     }
 }

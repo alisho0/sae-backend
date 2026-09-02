@@ -21,4 +21,4 @@ jwt:
   expiration-ms: 86400000
 
 app:
-  periodo-activo: ${PERIODO_ACTIVO:09-2026}
+  periodo-activo: ${PERIODO_ACTIVO:05-2026}

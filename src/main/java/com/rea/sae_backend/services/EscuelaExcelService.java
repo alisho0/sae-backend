@@ -98,9 +98,9 @@ public class EscuelaExcelService {
                     Escuela escuela = escuelaRepository.findByCue(cue).orElseGet(Escuela::new);
                     escuela.setNombre(nombre);
                     escuela.setCue(cue);
-                    if (escuela.getAsistenciaCompletada() == null) {
-                        escuela.setAsistenciaCompletada(false);
-                    }
+                    //if (escuela.getAsistenciaCompletada() == null) {
+                      //  escuela.setAsistenciaCompletada(false);
+                    //}
                     escuela = escuelaRepository.save(escuela);
 
                     Usuario usuario = escuela.getUsuario();

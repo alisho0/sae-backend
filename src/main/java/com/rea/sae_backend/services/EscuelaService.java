@@ -1,13 +1,17 @@
 package com.rea.sae_backend.services;
 
 import com.rea.sae_backend.dtos.EscuelaRequestDto;
+import com.rea.sae_backend.dtos.EscuelaResponseDto;
 import com.rea.sae_backend.dtos.EscuelaUpdateRequestDto;
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
+import com.rea.sae_backend.models.Periodo;
+import com.rea.sae_backend.models.PeriodoEscuela;
 import com.rea.sae_backend.models.RegistroAsistencia;
 import com.rea.sae_backend.models.Role;
 import com.rea.sae_backend.models.Usuario;
 import com.rea.sae_backend.repositories.EscuelaRepository;
+import com.rea.sae_backend.repositories.PeriodoEscuelaRepository;
 import com.rea.sae_backend.repositories.RegistroAsistenciaRepository;
 import com.rea.sae_backend.repositories.UsuarioRepository;
 
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,6 +35,8 @@ public class EscuelaService {
     private final EscuelaRepository escuelaRepository;
     private final UsuarioRepository usuarioRepository;
     private final RegistroAsistenciaRepository registroRepository;
+    private final PeriodoEscuelaRepository periodoEscuelaRepository;
+    private final PeriodoService periodoService;
     private final UsuarioService usuarioService;
 
     public List<Escuela> findAll() {
@@ -50,7 +57,6 @@ public class EscuelaService {
         Escuela escuelaEntity = new Escuela();
         escuelaEntity.setNombre(escuela.getNombre() != null ? escuela.getNombre() : "");
         escuelaEntity.setCue(escuela.getCue() != null ? escuela.getCue() : "");
-        escuelaEntity.setAsistenciaCompletada(false);
         escuelaEntity = escuelaRepository.save(escuelaEntity);
 
         Usuario usuario = new Usuario();
@@ -69,7 +75,6 @@ public class EscuelaService {
             .map(existing -> {
                 existing.setNombre(escuelaDetails.getNombre() != null ? escuelaDetails.getNombre() : existing.getNombre());
                 existing.setCue(escuelaDetails.getCue() != null ? escuelaDetails.getCue() : existing.getCue());
-                existing.setAsistenciaCompletada(escuelaDetails.getAsistenciaCompletada() != null ? escuelaDetails.getAsistenciaCompletada() : existing.getAsistenciaCompletada());
 
                 List<Long> alumnoIds = escuelaDetails.getAlumnoIds();
                 if (alumnoIds != null) {
@@ -99,12 +104,39 @@ public class EscuelaService {
         escuelaRepository.deleteById(id);
     }
 
+    @Transactional
     public Boolean cerrarAsistencia(Long id) {
         Escuela escuela = escuelaRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Escuela no encontrada"));
 
-        escuela.setAsistenciaCompletada(true);
-        escuelaRepository.save(escuela);
-        return escuela.getAsistenciaCompletada();
+        Periodo periodoActivo = periodoService.getPeriodoActivo();
+
+        PeriodoEscuela periodoEscuela = periodoEscuelaRepository
+                .findByEscuelaIdAndPeriodoId(escuela.getId(), periodoActivo.getId())
+                .orElseGet(() -> {
+                    PeriodoEscuela pe = new PeriodoEscuela();
+                    pe.setEscuela(escuela);
+                    pe.setPeriodo(periodoActivo);
+                    pe.setCerrado(false);
+                    return pe;
+                });
+
+        periodoEscuela.setCerrado(true);
+        periodoEscuela.setFechaCierre(LocalDateTime.now());
+        periodoEscuelaRepository.save(periodoEscuela);
+
+        return periodoEscuela.getCerrado();
+    }
+
+    public Boolean isAsistenciaCompletada(Long escuelaId) {
+        Periodo periodoActivo = periodoService.getPeriodoActivo();
+        return periodoEscuelaRepository
+                .findByEscuelaIdAndPeriodoId(escuelaId, periodoActivo.getId())
+                .map(PeriodoEscuela::getCerrado)
+                .orElse(false);
+    }
+
+    public EscuelaResponseDto toResponseDto(Escuela escuela) {
+        return EscuelaResponseDto.fromEntity(escuela, isAsistenciaCompletada(escuela.getId()));
     }
 }

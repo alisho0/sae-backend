@@ -29,8 +29,6 @@ public class Escuela {
     private String nombre;
     private String cue;
 
-    private Boolean asistenciaCompletada;
-
     @OneToOne(mappedBy = "escuela")
     @JsonIgnoreProperties("escuela")
     private Usuario usuario;
@@ -38,4 +36,6 @@ public class Escuela {
     @OneToMany(mappedBy = "escuela")
     @JsonIgnoreProperties("escuela")
     private List<Alumno> alumnos;
+
+    
 }
