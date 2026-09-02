@@ -14,7 +14,7 @@ public class Periodo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String periodo;
+    private String valor;
     private Boolean cerrado = false;
     private LocalDateTime fechaCierre;
 }
