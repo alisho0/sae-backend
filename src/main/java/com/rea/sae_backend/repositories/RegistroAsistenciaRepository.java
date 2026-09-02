@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface RegistroAsistenciaRepository
         extends JpaRepository<RegistroAsistencia, Long>, JpaSpecificationExecutor<RegistroAsistencia> {
-    Optional<RegistroAsistencia> findByAlumnoIdAndPeriodo(Long alumnoId, String periodo);
+    Optional<RegistroAsistencia> findByAlumnoIdAndPeriodoValor(Long alumnoId, String valor);
 }

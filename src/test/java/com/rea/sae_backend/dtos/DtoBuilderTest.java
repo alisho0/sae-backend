@@ -2,6 +2,7 @@ package com.rea.sae_backend.dtos;
 
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
+import com.rea.sae_backend.models.Periodo;
 import com.rea.sae_backend.models.RegistroAsistencia;
 import com.rea.sae_backend.models.Usuario;
 import org.junit.jupiter.api.Test;
@@ -29,9 +30,14 @@ class DtoBuilderTest {
         alumno.setEscuela(escuela);
         escuela.setAlumnos(List.of(alumno));
 
+        Periodo periodo = new Periodo();
+        periodo.setId(9L);
+        periodo.setValor("09-2026");
+        periodo.setCerrado(false);
+
         RegistroAsistencia registro = new RegistroAsistencia();
         registro.setId(5L);
-        registro.setPeriodo("09-2026");
+        registro.setPeriodo(periodo);
         registro.setCurso("5to");
         registro.setCumpleAsistencia(true);
         registro.setCreadoPorEscuela(true);

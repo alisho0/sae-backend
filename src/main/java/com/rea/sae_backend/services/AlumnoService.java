@@ -6,6 +6,7 @@ import com.rea.sae_backend.dtos.AlumnoResponseDto;
 import com.rea.sae_backend.dtos.ExcelImportResultDto;
 import com.rea.sae_backend.models.Alumno;
 import com.rea.sae_backend.models.Escuela;
+import com.rea.sae_backend.models.Periodo;
 import com.rea.sae_backend.models.RegistroAsistencia;
 import com.rea.sae_backend.repositories.AlumnoRepository;
 import com.rea.sae_backend.repositories.EscuelaRepository;
@@ -46,11 +47,12 @@ public class AlumnoService {
     private final RegistroAsistenciaRepository registroRepository;
     private final EscuelaRepository escuelaRepository;
     private final PeriodoConfig periodoConfig;
+    private final PeriodoService periodoService;
 
     public Page<RegistroAsistencia> findAll(Pageable pageable, Boolean cumpleAsistencia, String dni, Long escuelaId, String periodo) {
-        String p = periodoConfig.resolve(periodo);
+        Periodo p = periodoService.resolve(periodo);
         Specification<RegistroAsistencia> spec = Specification
-                .where(RegistroAsistenciaSpecification.periodoEquals(p))
+                .where(RegistroAsistenciaSpecification.periodoEquals(p.getValor()))
                 .and(RegistroAsistenciaSpecification.dniEquals(dni))
                 .and(RegistroAsistenciaSpecification.cumpleAsistencia(cumpleAsistencia))
                 .and(RegistroAsistenciaSpecification.escuelaIdEquals(escuelaId));
@@ -62,15 +64,15 @@ public class AlumnoService {
     }
 
     public List<RegistroAsistencia> findAllByEscuela(Long escuelaId, String periodo) {
-        String p = periodoConfig.resolve(periodo);
+        Periodo p = periodoService.resolve(periodo);
         Specification<RegistroAsistencia> spec = Specification
-                .where(RegistroAsistenciaSpecification.periodoEquals(p))
+                .where(RegistroAsistenciaSpecification.periodoEquals(p.getValor()))
                 .and(RegistroAsistenciaSpecification.escuelaIdEquals(escuelaId));
         return registroRepository.findAll(spec);
     }
 
     public RegistroAsistencia create(AlumnoRequestDto alumno) {
-        String periodo = periodoConfig.resolve(alumno.getPeriodo());
+        Periodo periodo = periodoService.resolve(alumno.getPeriodo());
 
         Alumno alumnoModel;
         if (alumno.getDni() != null && !alumno.getDni().isBlank()) {
@@ -91,7 +93,7 @@ public class AlumnoService {
         alumnoModel = alumnoRepository.save(alumnoModel);
 
         RegistroAsistencia registro = registroRepository
-                .findByAlumnoIdAndPeriodo(alumnoModel.getId(), periodo)
+                .findByAlumnoIdAndPeriodoValor(alumnoModel.getId(), periodo.getValor())
                 .orElseGet(RegistroAsistencia::new);
         registro.setAlumno(alumnoModel);
         registro.setPeriodo(periodo);
@@ -158,7 +160,7 @@ public class AlumnoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo subido está vacío o es nulo");
         }
 
-        String periodoResuelto = periodoConfig.resolve(periodo);
+        Periodo periodoResuelto = periodoService.resolve(periodo);
 
         List<AlumnoResponseDto> alumnosCargados = new ArrayList<>();
         List<String> errores = new ArrayList<>();
@@ -234,7 +236,7 @@ public class AlumnoService {
                     alumno = alumnoRepository.save(alumno);
 
                     RegistroAsistencia registro = registroRepository
-                            .findByAlumnoIdAndPeriodo(alumno.getId(), periodoResuelto)
+                            .findByAlumnoIdAndPeriodoValor(alumno.getId(), periodoResuelto.getValor())
                             .orElseGet(RegistroAsistencia::new);
                     registro.setAlumno(alumno);
                     registro.setPeriodo(periodoResuelto);

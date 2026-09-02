@@ -42,11 +42,14 @@ class AlumnoExcelServiceTest {
     @Mock
     private PeriodoConfig periodoConfig;
 
+    @Mock
+    private PeriodoService periodoService;
+
     private AlumnoService alumnoService;
 
     @BeforeEach
     void setUp() {
-        alumnoService = new AlumnoService(alumnoRepository, registroRepository, escuelaRepository, periodoConfig);
+        alumnoService = new AlumnoService(alumnoRepository, registroRepository, escuelaRepository, periodoConfig, periodoService);
     }
 
     /*

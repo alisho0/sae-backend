@@ -63,7 +63,7 @@ public class PeriodoService {
         Trae el periodo si existe, sino lo crea. En caso de venir vacío el parámetro, llama a traer el periodo activo.
      */
     @Transactional
-    private Periodo resolve ( String valor ) {
+    public Periodo resolve ( String valor ) {
         if (valor == null || valor.isBlank()) {
             return getPeriodoActivo();
         }

@@ -33,7 +33,7 @@ public class AlumnoResponseDto {
         Alumno alumno = registro.getAlumno();
         return AlumnoResponseDto.builder()
                 .id(registro.getId())
-                .periodo(registro.getPeriodo())
+                .periodo(registro.getPeriodo().getValor())
                 .nombre(alumno != null ? alumno.getNombre() : null)
                 .apellido(alumno != null ? alumno.getApellido() : null)
                 .curso(registro.getCurso())

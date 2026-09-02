@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import com.rea.sae_backend.models.Periodo;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -24,15 +25,15 @@ import lombok.RequiredArgsConstructor;
 public class ReporteService {
 
     private final RegistroAsistenciaRepository registroRepository;
-    private final PeriodoConfig periodoConfig;
+    private final PeriodoService periodoService;
 
     public byte[] getAsistencia(Long escuelaId, String periodo) throws IOException {
 
-        String p = periodoConfig.resolve(periodo);
+        Periodo p = periodoService.resolve(periodo);
 
         Specification<RegistroAsistencia> spec =
                 Specification.where(
-                                RegistroAsistenciaSpecification.periodoEquals(p)
+                                RegistroAsistenciaSpecification.periodoEquals(p.getValor())
                         )
                         .and(RegistroAsistenciaSpecification.escuelaIdEquals(escuelaId));
 

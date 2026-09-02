@@ -9,7 +9,7 @@ public class RegistroAsistenciaSpecification {
         return (root, query, criteriaBuilder) ->
                 periodo == null || periodo.isBlank()
                         ? null
-                        : criteriaBuilder.equal(root.get("periodo"), periodo);
+                        : criteriaBuilder.equal(root.get("periodo").get("valor"), periodo);
     }
 
     public static Specification<RegistroAsistencia> cumpleAsistencia(Boolean cumple) {
