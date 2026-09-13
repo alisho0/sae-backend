@@ -8,7 +8,7 @@
 
 - [x] **Fase 0 — Control de daños** (eliminado `/auth/register` público; agregado `spring-boot-starter-oauth2-resource-server` para compilar).
 - [x] **Fase 1 — Provisión de Keycloak** (`docker-compose.yml`, `infra/realm-export.json`).
-- [ ] **Fase 2 — Backend resource server (OIDC)**.
+- [x] **Fase 2 — Backend resource server (OIDC)**.
 - [ ] **Fase 3 — Mapeo de identidad y aislamiento por escuela**.
 - [ ] **Fase 4 — Frontend OIDC (PKCE)**.
 - [ ] **Fase 5 — Migración de los usuarios existentes**.
@@ -326,6 +326,16 @@ public class SecurityConfig {
     }
 }
 ```
+
+> **Nota (implementado):** `JwtAuthenticationFilter` se eliminó en esta fase (no en la 6).
+> Como el filtro era `@Component`, Spring Boot lo registraba también como *servlet filter*,
+> por lo que un token OIDC habría provocado un error 500 antes de llegar a Spring Security.
+> Su validación quedó cubierta por el decodificador dual de `JwtResourceServerConfig`
+> (Keycloak RS256 + legacy HS256). El bean `AuthenticationManager`
+> (`configuration.getAuthenticationManager()`) se **conserva**: en Spring Security 7
+> `AuthenticationConfiguration` no lo publica como bean y `AuthController` lo inyecta.
+> `JwtService`, `CustomUserDetailsService` y `CustomUserDetails` se conservan por el
+> login legacy (`/auth/login`).
 
 > Se eliminan: `JwtAuthenticationFilter`, `JwtService` (jjwt), `DaoAuthenticationProvider`
 > y `CustomUserDetailsService` pasan a modo "legacy" (ver Fase 6). El `PasswordEncoder`

@@ -16,9 +16,15 @@ spring:
       hibernate:
         format_sql: true
 
+# JWT emitido localmente (login legacy durante la transición; se elimina en Fase 6)
 jwt:
   secret: ${JWT_SECRET:c2VjcmV0LWJhc2U2NC1wYXlsb2FkLXNlY3JldC1rZXk=}
   expiration-ms: 86400000
 
 app:
   periodo-activo: ${PERIODO_ACTIVO:05-2026}
+
+  # IDP: Keycloak (OIDC Resource Server)
+  keycloak:
+    issuer-uri: ${KC_ISSUER_URI:http://localhost:8081/realms/sae_realm}
+    jwk-set-uri: ${KC_JWKS_URI:http://localhost:8081/realms/sae_realm/protocol/openid-connect/certs}

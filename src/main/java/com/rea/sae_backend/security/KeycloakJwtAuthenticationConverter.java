@@ -10,22 +10,35 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Component
-public class KeycloakJwtAuthenticationConverter  implements Converter<Jwt, AbstractAuthenticationToken> {
+public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+    private static final List<String> APP_ROLES = List.of("ADMIN", "DIRECTOR");
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-        Map<String, Object> realmAccess = jwt.getClaim("realm_access");
-        if (realmAccess != null && realmAccess.containsKey("roles")) {
-            Collection<String> roles = (Collection<String>) realmAccess.get("roles");
-
-            roles.forEach( role ->
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+        // Roles del IDP (Keycloak): realm_access.roles, filtrando roles no usados por la app
+        Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
+        if (realmAccess != null && realmAccess.get("roles") instanceof Collection<?> roles) {
+            roles.stream()
+                .map(String::valueOf)
+                .filter(APP_ROLES::contains)
+                .forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
         }
-        return new JwtAuthenticationToken(jwt, authorities);
+
+        // Fallback: claim "role" de los JWT generados localmente (login legacy)
+        if (authorities.isEmpty()) {
+            String role = jwt.getClaimAsString("role");
+            if (role != null && APP_ROLES.contains(role)) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+            }
+        }
+
+        return new JwtAuthenticationToken(jwt, authorities, jwt.getSubject());
     }
 }

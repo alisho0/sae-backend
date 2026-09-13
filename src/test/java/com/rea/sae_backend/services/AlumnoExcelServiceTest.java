@@ -1,31 +1,13 @@
 package com.rea.sae_backend.services;
 
-import com.rea.sae_backend.config.PeriodoConfig;
-import com.rea.sae_backend.dtos.ExcelImportResultDto;
-import com.rea.sae_backend.models.Alumno;
-import com.rea.sae_backend.models.Escuela;
 import com.rea.sae_backend.repositories.AlumnoRepository;
 import com.rea.sae_backend.repositories.EscuelaRepository;
-import com.rea.sae_backend.repositories.PeriodoEscuelaRepository;
 import com.rea.sae_backend.repositories.RegistroAsistenciaRepository;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,19 +23,13 @@ class AlumnoExcelServiceTest {
     private EscuelaRepository escuelaRepository;
 
     @Mock
-    private PeriodoConfig periodoConfig;
-
-    @Mock
-    private PeriodoEscuelaRepository periodoEscuelaRepository;
-
-    @Mock
     private PeriodoService periodoService;
 
     private AlumnoService alumnoService;
 
     @BeforeEach
     void setUp() {
-        alumnoService = new AlumnoService(alumnoRepository, registroRepository, escuelaRepository, periodoConfig, periodoEscuelaRepository, periodoService);
+        alumnoService = new AlumnoService(alumnoRepository, registroRepository, escuelaRepository, periodoService);
     }
 
     /*
