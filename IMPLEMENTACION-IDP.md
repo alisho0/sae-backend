@@ -4,6 +4,16 @@
 > delegada a un Identity Provider (IDP), conservando la tabla `usuarios` como
 > registro de dominio (**Opción A**).
 
+## Estado de implementación
+
+- [x] **Fase 0 — Control de daños** (eliminado `/auth/register` público; agregado `spring-boot-starter-oauth2-resource-server` para compilar).
+- [x] **Fase 1 — Provisión de Keycloak** (`docker-compose.yml`, `infra/realm-export.json`).
+- [ ] **Fase 2 — Backend resource server (OIDC)**.
+- [ ] **Fase 3 — Mapeo de identidad y aislamiento por escuela**.
+- [ ] **Fase 4 — Frontend OIDC (PKCE)**.
+- [ ] **Fase 5 — Migración de los usuarios existentes**.
+- [ ] **Fase 6 — Endurecimiento, limpieza y pruebas**.
+
 ---
 
 ## 1. Contexto y estado actual
