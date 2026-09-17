@@ -16,6 +16,8 @@ import com.rea.sae_backend.services.ReporteService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reportes")
@@ -24,6 +26,7 @@ public class ReporteController {
     private final ReporteService reporteService;
 
     @GetMapping("/escuela/{escuelaId}")
+    @PreAuthorize("hasRole('ADMIN') or (#escuelaId == @currentUserService.getEscuelaId())")
     public ResponseEntity<byte[]> descargarEscuela(
             @PathVariable Long escuelaId,
             @RequestParam(required = false) String periodo
@@ -37,6 +40,7 @@ public class ReporteController {
     }
 
     @GetMapping("/escuelas")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> descargarTodas(
             @RequestParam(required = false) String periodo
     ) {

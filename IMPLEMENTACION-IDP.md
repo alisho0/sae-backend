@@ -9,7 +9,7 @@
 - [x] **Fase 0 — Control de daños** (eliminado `/auth/register` público; agregado `spring-boot-starter-oauth2-resource-server` para compilar).
 - [x] **Fase 1 — Provisión de Keycloak** (`docker-compose.yml`, `infra/realm-export.json`).
 - [x] **Fase 2 — Backend resource server (OIDC)**.
-- [ ] **Fase 3 — Mapeo de identidad y aislamiento por escuela**.
+- [x] **Fase 3 — Mapeo de identidad y aislamiento por escuela**.
 - [ ] **Fase 4 — Frontend OIDC (PKCE)**.
 - [ ] **Fase 5 — Migración de los usuarios existentes**.
 - [ ] **Fase 6 — Endurecimiento, limpieza y pruebas**.
@@ -470,6 +470,25 @@ public class AlumnoController {
 - `UsuarioResponseDto` agrega `keycloakSubject` (o el `username` del IDP).
 - `/usuarios/**` sigue siendo ADMIN-only. El ADMIN ve/crea usuarios y los vincula
   con su `keycloakSubject` (campo cargado por el endpoint de admin, no editable por el usuario).
+
+> **Nota (implementado):**
+> - `Usuario` declara `@Column(name = "keycloak_subject", unique = true)`
+>   (se aplica con `ddl-auto: update` en dev; el DDL explícito va al deploy).
+> - Nuevo `CurrentUserService` en `security/` (`getSubject`, `getEscuelaId` con
+>   Number/String, `getRoles`, `isAdmin`, `isEscuelaAccesible`, `getUsuarioDominio`).
+> - `AlumnoController`: `@PreAuthorize` en `GET /escuela/{id}`; en `list/create/
+>   update/cargar-excel` la escuela del DIRECTOR se impone desde el token (ignora
+>   body/query); `getById/asistencia/delete` validan que el registro pertenezca a
+>   la escuela del token (403 si no).
+> - `EscuelaController`: `GET/PUT /{id}` y `cerrar-asistencia` → ADMIN o propia
+>   escuela; `POST`, `DELETE` y `cargar-excel` → solo ADMIN; `list()` devuelve la
+>   propia escuela para DIRECTOR.
+> - `ReporteController`: `GET /escuela/{id}` → ADMIN o propia escuela; `GET /escuelas`
+>   → solo ADMIN.
+> - `AlumnoService.cargarAlumnosDesdeExcel` acepta `escuelaIdRestringida` (omitida
+>   por un DIRECTOR, no es de su escuela).
+> - `UsuarioResponseDto` expone `keycloakSubject`; la BD conserva `role` como dato
+>   de dominio (deprecado, el rol real proviene del token).
 
 ---
 

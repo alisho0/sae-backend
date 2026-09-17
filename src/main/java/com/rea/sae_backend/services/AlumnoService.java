@@ -153,7 +153,7 @@ public class AlumnoService {
     }
 
     @Transactional
-    public ExcelImportResultDto cargarAlumnosDesdeExcel(MultipartFile file, String periodo) {
+    public ExcelImportResultDto cargarAlumnosDesdeExcel(MultipartFile file, String periodo, Long escuelaIdRestringida) {
         if (file == null || file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo subido está vacío o es nulo");
         }
@@ -219,6 +219,13 @@ public class AlumnoService {
                     }
 
                     Escuela escuela = escuelaOptional.get();
+
+                    if (escuelaIdRestringida != null && !escuela.getId().equals(escuelaIdRestringida)) {
+                        fallidos++;
+                        errores.add(String.format("Fila %d: La escuela CUE '%s' no corresponde a la escuela del director. Alumno omitido (DNI: %s, Alumno: %s %s)",
+                                filaNumero, cue, dni, apellido, nombre));
+                        continue;
+                    }
 
                     Alumno alumno;
                     if (dni != null && !dni.isBlank()) {

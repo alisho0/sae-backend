@@ -2,6 +2,7 @@ package com.rea.sae_backend.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,6 +29,9 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
+
+    @Column(name = "keycloak_subject", unique = true)
+    private String keycloakSubject;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;

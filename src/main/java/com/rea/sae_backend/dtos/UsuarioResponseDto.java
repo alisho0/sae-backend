@@ -14,6 +14,7 @@ public class UsuarioResponseDto {
     private Long id;
     private String nombre;
     private Long escuelaId;
+    private String keycloakSubject;
 
     public static UsuarioResponseDto fromEntity(Usuario usuario) {
         if (usuario == null) {
@@ -24,6 +25,7 @@ public class UsuarioResponseDto {
                 .id(usuario.getId())
                 .nombre(usuario.getUsername())
                 .escuelaId(usuario.getEscuela() != null ? usuario.getEscuela().getId() : null)
+                .keycloakSubject(usuario.getKeycloakSubject())
                 .build();
     }
 }

@@ -32,6 +32,18 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
+    public Optional<Usuario> findByKeycloakSubject(String keycloakSubject) {
+        return usuarioRepository.findByKeycloakSubject(keycloakSubject);
+    }
+
+    /** Vincula un registro de dominio al identity de Keycloak. */
+    public void asignarSubject(String username, String subject) {
+        findByUsername(username).ifPresent(u -> {
+            u.setKeycloakSubject(subject);
+            usuarioRepository.save(u);
+        });
+    }
+
     public Usuario create(Usuario usuario) {
         if (usuario.getRole() == null) {
             usuario.setRole(Role.DIRECTOR);
@@ -51,6 +63,9 @@ public class UsuarioService {
                 }
                 existing.setEscuela(usuarioDetails.getEscuela());
                 existing.setRole(usuarioDetails.getRole() != null ? usuarioDetails.getRole() : existing.getRole());
+                if (usuarioDetails.getKeycloakSubject() != null) {
+                    existing.setKeycloakSubject(usuarioDetails.getKeycloakSubject());
+                }
                 return usuarioRepository.save(existing);
             })
             .orElseGet(() -> {
