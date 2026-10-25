@@ -31,7 +31,7 @@
       "publicClient": true,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
+      "directAccessGrantsEnabled": true,
       "consentRequired": false,
       "protocol": "openid-connect",
       "redirectUris": ["http://localhost:5173/*"],
@@ -54,6 +54,72 @@
             "userinfo.token.claim": "true"
           }
         }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "e0a1b2c3-d4e5-4f6a-8b9c-0d1e2f3a4b5c",
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@sae.local",
+      "firstName": "Administrador",
+      "lastName": "General",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "SaeSecret2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "id": "f1a2b3c4-d5e6-4f7a-8b9c-1d2e3f4a5b6c",
+      "username": "director_1",
+      "enabled": true,
+      "email": "director1@sae.local",
+      "firstName": "Director",
+      "lastName": "Escuela 1",
+      "attributes": {
+        "escuela_id": [
+          "1"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "SaeSecret2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DIRECTOR"
+      ]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-2e3f4a5b6c7d",
+      "username": "123456",
+      "enabled": true,
+      "email": "cue123456@sae.local",
+      "firstName": "Director CUE",
+      "lastName": "123456",
+      "attributes": {
+        "escuela_id": [
+          "1"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "SaeSecret2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DIRECTOR"
       ]
     }
   ]

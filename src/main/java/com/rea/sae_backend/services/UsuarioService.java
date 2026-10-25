@@ -3,22 +3,21 @@ package com.rea.sae_backend.services;
 import com.rea.sae_backend.models.Role;
 import com.rea.sae_backend.models.Usuario;
 import com.rea.sae_backend.repositories.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
-        this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
@@ -42,6 +41,50 @@ public class UsuarioService {
             u.setKeycloakSubject(subject);
             usuarioRepository.save(u);
         });
+    }
+
+    /**
+     * Busca el usuario de dominio por su Keycloak Subject (UUID).
+     * Si no se encuentra vinculado (ej. primer login con Keycloak tras migración),
+     * busca por nombre de usuario de dominio y lo auto-vincula.
+     *
+     * @param keycloakSubject UUID del usuario emitido por Keycloak (claim 'sub').
+     * @param preferredUsername Nombre de usuario proveniente del token OIDC (claim 'preferred_username').
+     * @param isKeycloakToken Indica si el token proviene de Keycloak (para no auto-vincular tokens legacy).
+     * @return El usuario de dominio persistido y vinculado.
+     */
+    @Transactional
+    public Usuario findOrLinkByKeycloakSubject(String keycloakSubject, String preferredUsername, boolean isKeycloakToken) {
+        if (keycloakSubject == null || keycloakSubject.isBlank()) {
+            throw new AccessDeniedException("Token sin identificador de sujeto (sub)");
+        }
+
+        // 1. Caso ya vinculado: búsqueda rápida por subject
+        Optional<Usuario> usuarioPorSubject = usuarioRepository.findByKeycloakSubject(keycloakSubject);
+        if (usuarioPorSubject.isPresent()) {
+            return usuarioPorSubject.get();
+        }
+
+        // 2. Si no es un token de Keycloak (ej. JWT legacy), solo buscamos por username sin modificar el subject
+        String usernameToSearch = (preferredUsername != null && !preferredUsername.isBlank())
+                ? preferredUsername
+                : keycloakSubject;
+
+        Optional<Usuario> usuarioPorUsername = usuarioRepository.findByUsername(usernameToSearch)
+                .or(() -> usuarioRepository.findByUsernameIgnoreCase(usernameToSearch));
+
+        if (usuarioPorUsername.isPresent()) {
+            Usuario usuario = usuarioPorUsername.get();
+
+            // Solo auto-vinculamos si es un token genuino de Keycloak y el usuario aún no tiene subject
+            if (isKeycloakToken && (usuario.getKeycloakSubject() == null || usuario.getKeycloakSubject().isBlank())) {
+                usuario.setKeycloakSubject(keycloakSubject);
+                return usuarioRepository.save(usuario);
+            }
+            return usuario;
+        }
+
+        throw new AccessDeniedException("Usuario de dominio no encontrado para la identidad autenticada");
     }
 
     public Usuario create(Usuario usuario) {

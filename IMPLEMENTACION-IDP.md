@@ -10,7 +10,7 @@
 - [x] **Fase 1 — Provisión de Keycloak** (`docker-compose.yml`, `infra/realm-export.json`).
 - [x] **Fase 2 — Backend resource server (OIDC)**.
 - [x] **Fase 3 — Mapeo de identidad y aislamiento por escuela**.
-- [ ] **Fase 4 — Frontend OIDC (PKCE)**.
+- [x] **Fase 4 — Frontend OIDC (PKCE)**.
 - [ ] **Fase 5 — Migración de los usuarios existentes**.
 - [ ] **Fase 6 — Endurecimiento, limpieza y pruebas**.
 
@@ -556,6 +556,28 @@ export const getEscuelaIdFromToken = (tokenAccess) =>
 - `authSlice` pasa a derivarse de `keycloak.tokenParsed`; `logout` llama a
   `keycloak.logout()` (elimina el `localStorage` del token).
 - `LogoutButton` invoca `keycloak.logout({ redirectUri: 'http://localhost:5173/login' })`.
+
+> **Nota (implementado):**
+> - `pnpm add keycloak-js` (26.2.4).
+> - Nuevo `src/services/keycloak.js` (url `VITE_KEYCLOAK_URL`, realm `sae_realm`,
+>   client `sae-front`).
+> - `src/main.jsx`: `keycloak.init({ onLoad: 'check-sso', pkceMethod: 'S256',
+>   redirectUri: window.location.origin })` **sin bloquear el render**; al resolver
+>   despacha `setAuthFromKeycloak` (Redux re-renderiza solo). `onTokenExpired`
+>   renueva con `updateToken(30)`.
+> - `src/services/api.js`: el interceptor usa `keycloak.token` en memoria
+>   (renova con `updateToken(5)` si expira); se eliminó la lectura de
+>   `localStorage('sae_token')`.
+> - `src/store/slices/authSlice.js`: se eliminó `loginUser`/`decodeToken`; el estado
+>   es espejo de keycloak (`token`, `user` = `tokenParsed`, `isAuthenticated`).
+> - `src/utils/auth.js`: `getUserRole` entiende `realm_access.roles` (Keycloak);
+>   `getEscuelaIdFromUser` normaliza `escuela_id` (string→number).
+> - `src/pages/LoginPage.jsx`: ya no pide credenciales; `keycloak.login()` redirige
+>   al IDP (la contraseña la teclea el usuario en Keycloak, no en la app).
+> - `LogoutButton`: `dispatch(logout())` + `keycloak.logout({ redirectUri:
+>   <origin>/login })`.
+> - Verificado: `pnpm build` OK; sin errores de lint en los archivos tocados
+>   (existen 9 errores de lint preexistentes en páginas sin relación).
 
 ---
 

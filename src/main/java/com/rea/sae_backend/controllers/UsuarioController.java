@@ -3,6 +3,8 @@ package com.rea.sae_backend.controllers;
 import com.rea.sae_backend.dtos.UsuarioResponseDto;
 import com.rea.sae_backend.models.Usuario;
 import com.rea.sae_backend.services.UsuarioService;
+import com.rea.sae_backend.security.CurrentUserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +22,15 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/usuarios")
+@RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final CurrentUserService currentUserService;
 
-    public UsuarioController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
+    @GetMapping("/me")
+    public UsuarioResponseDto me() {
+        return UsuarioResponseDto.fromEntity(currentUserService.getUsuarioDominio());
     }
 
     @GetMapping

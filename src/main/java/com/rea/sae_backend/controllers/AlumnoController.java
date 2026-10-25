@@ -104,15 +104,16 @@ public class AlumnoController {
     public AlumnoResponseDto create(@RequestBody AlumnoRequestDto alumno) {
         if (!currentUserService.isAdmin()) {
             alumno.setEscuelaId(currentUserService.getEscuelaId());
+            alumno.setCreadoPorEscuela(true);
         }
         return AlumnoResponseDto.fromEntity(alumnoService.create(alumno));
     }
 
     @PostMapping(value = {"/cargar-excel", "/importar-excel"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ExcelImportResultDto> cargarExcel(@RequestParam("file") MultipartFile file,
                                                             @RequestParam(required = false) String periodo) {
-        Long escuelaId = currentUserService.isAdmin() ? null : currentUserService.getEscuelaId();
-        ExcelImportResultDto resultado = alumnoService.cargarAlumnosDesdeExcel(file, periodo, escuelaId);
+        ExcelImportResultDto resultado = alumnoService.cargarAlumnosDesdeExcel(file, periodo, null);
         return ResponseEntity.ok(resultado);
     }
 
