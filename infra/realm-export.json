@@ -16,7 +16,7 @@
   "accessTokenLifespan": 300,
   "ssoSessionIdleTimeout": 1800,
   "ssoSessionMaxLifespan": 28800,
-  "passwordPolicy": "length(10) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername(1)",
+  "passwordPolicy": "length(3)",
   "roles": {
     "realm": [
       { "name": "ADMIN" },
